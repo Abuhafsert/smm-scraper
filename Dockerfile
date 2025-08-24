@@ -1,20 +1,33 @@
-# syntax=docker/dockerfile:1
+FROM node:22
 
-FROM mcr.microsoft.com/playwright:v1.55.0-jammy
-
-RUN npm install -g npm@10.1.0
-RUN pip install --no-cache-dir -r requirements.txt # requirements.txt contains playwright
-RUN playwright install
-RUN playwright install-dep
-
+# Set working directory
 WORKDIR /app
 
-COPY package.json package-lock.json ./
+# Copy package.json and install dependencies
+COPY package.json .
+RUN npm install
 
-RUN --mount=type=cache,target=/root/.npm \
-    npm i
+# Install Playwright browsers
+RUN npx playwright install-deps
 
-# Copy the rest of the files into the image.
-COPY . .
+# Install system dependencies for Playwright
+RUN apt-get update && apt-get install -y \
+  libnss3 \
+  libatk-bridge2.0-0 \
+  libxkbcommon-x11-0 \
+  libdrm2 \
+  libgbm1 \
+  libxcomposite1 \
+  libxdamage1 \
+  libxrandr2 \
+  libasound2 \
+  && rm -rf /var/lib/apt/lists/*
 
-CMD npx playwright --version
+# Copy application code
+COPY index.js .
+
+# Set environment variable for Playwright browser cache
+ENV PLAYWRIGHT_BROWSERS_PATH=/root/.cache/ms-playwright
+
+# Run the application
+CMD ["npm", "start"]
