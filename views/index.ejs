@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Beautiful Navigation Drawer</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://unpkg.com/@otplib/preset-browser@^12.0.0/buffer.js"></script>
+    <script src="https://unpkg.com/@otplib/preset-browser@^12.0.0/index.js"></script>
+    <script
+      src="https://kit.fontawesome.com/2d77ec72a5.js"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.6.7/dist/axios.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Poppins", sans-serif;
+      }
+
+      body {
+        background-color: #f4f4f9;
+        overflow-x: hidden;
+      }
+
+      /* Drawer Styles */
+      .drawer {
+        position: fixed;
+        top: 0;
+        left: -250px; /* Hidden by default */
+        width: 250px;
+        height: 100%;
+        background-color: #2c3e50;
+        color: #ecf0f1;
+        transition: left 0.3s ease-in-out;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+      }
+
+      .drawer.open {
+        left: 0;
+      }
+
+      .drawer-header {
+        padding: 20px;
+        background-color: #1a252f;
+        text-align: center;
+        font-size: 1.5em;
+        font-weight: 500;
+      }
+
+      .drawer-nav {
+        list-style: none;
+        padding: 20px 0;
+      }
+
+      .drawer-nav li {
+        padding: 15px 20px;
+      }
+
+      .drawer-nav li a {
+        color: #ecf0f1;
+        text-decoration: none;
+        font-size: 1.1em;
+        display: block;
+        transition: background 0.2s;
+      }
+
+      .drawer-nav li a:hover {
+        background-color: #34495e;
+        border-radius: 5px;
+      }
+
+      /* Hamburger Menu */
+      .hamburger {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        font-size: 1.5em;
+        cursor: pointer;
+        z-index: 1100;
+        color: #2c3e50;
+        transition: transform 0.3s ease-in-out;
+      }
+
+      .hamburger.open span:nth-child(1) {
+        transform: rotate(45deg) translate(5px, 5px);
+      }
+
+      .hamburger.open span:nth-child(2) {
+        opacity: 0;
+      }
+
+      .hamburger.open span:nth-child(3) {
+        transform: rotate(-45deg) translate(7px, -7px);
+      }
+
+      .hamburger span {
+        display: block;
+        width: 25px;
+        height: 3px;
+        background-color: #2c3e50;
+        margin: 5px 0;
+        transition: all 0.3s ease-in-out;
+      }
+
+      /* Main Content */
+      .main-content {
+        margin-left: 20px;
+        padding: 60px 20px;
+        text-align: center;
+      }
+
+      .main-content h1 {
+        color: #2c3e50;
+        font-size: 2em;
+      }
+
+      @media (max-width: 768px) {
+        .drawer {
+          width: 200px;
+        }
+        .main-content {
+          margin-left: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="hamburger" onclick="toggleDrawer()">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+
+    <div class="drawer" id="drawer">
+      <div class="drawer-header">Menu</div>
+      <ul class="drawer-nav">
+        <li><a href="#home">Home</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#services">Services</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </div>
+
+    <div class="main-content">
+      <h1>Welcome to the Pva Accounty Creation</h1>
+      <form action="/mails" method="POST" id="signUp-form">
+        <button class="login-btn" id="btn-submit" type="submit">
+          Get mails
+        </button>
+      </form>
+      <%- include('./mail.ejs') %>
+    </div>
+
+    <script>
+      function toggleDrawer() {
+        const drawer = document.getElementById("drawer");
+        const hamburger = document.querySelector(".hamburger");
+        drawer.classList.toggle("open");
+        hamburger.classList.toggle("open");
+      }
+    </script>
+
+    <script>
+      $("#signUp-form").on("submit", async function (e) {
+        e.preventDefault();
+        axios
+          .get("/mails")
+          .then((res) => {
+            console.log(Object.values(res.data.mails));
+            $("#mailTbody").text("");
+            Object.values(res.data.mails).forEach((mail, i) => {
+              if (!mail) return;
+              const [m, p] = mail.split(":");
+              const tr = `
+                        <tr>
+                            <td><span>${i + 1}</span></td>
+                            <td><span>${m}</span><svg class="copy-icon" onclick="copyToClipboard(this)" viewBox="0 0 24 24"><path d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg><span class="tooltip">Copied!</span></td>
+                            <td><span>${p}</span><svg class="copy-icon" onclick="copyToClipboard(this)" viewBox="0 0 24 24"><path d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg><span class="tooltip">Copied!</span></td>
+                            <td><button id="${i}" value="${m}:${p}" onclick="logMail(this)" class='login-btn'>Login</button></td>
+                            <td><span class="loader-icon-container" onclick="getMailCode(this)"><svg class="loader-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#367c21" viewBox="0 0 256 256"><path d="M224,128a96,96,0,0,1-94.71,96H128A95.38,95.38,0,0,1,62.1,197.8a8,8,0,0,1,11-11.63A80,80,0,1,0,71.43,71.39a3.07,3.07,0,0,1-.26.25L44.59,96H72a8,8,0,0,1,0,16H24a8,8,0,0,1-8-8V56a8,8,0,0,1,16,0V85.8L60.25,60A96,96,0,0,1,224,128Z"></path></svg></span><span></span><svg class="copy-icon" onclick="copyToClipboard(this)" viewBox="0 0 24 24"><path d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg><span class="tooltip">Copied!</span></td>
+                        </tr>
+                    `;
+              $("#mailTbody").append(tr);
+            });
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      });
+
+      logMail = (val) => {
+        const email = $(val).val();
+        $(val).attr("disabled", true);
+        $(val).css("background", "#faebd7");
+        console.log($(val).closest(".loader-icon-container"));
+        const url = new URL(location);
+        url.searchParams.set("foo", "bar");
+        axios
+          .post("/mails", {
+            mails: `${email}`,
+          })
+          .then((res) => {
+            $(val).text("logged").css("background", "#2c3e50");
+            $(val)
+              .parent()
+              .parent()
+              .find(".loader-icon-container")
+              .attr("id", res.data.id);
+            console.log(res);
+          })
+          .catch((err) => {
+            console.log(err);
+          })
+          .finally(() => {
+            console.log("completed...");
+          });
+      };
+
+      let codeOnLoad = false;
+
+      getMailCode = (val) => {
+        if (codeOnLoad) return;
+        const id = $(val).attr("id");
+        codeOnLoad = true;
+        $(val).children().first().addClass("rotate");
+
+        axios
+          .post("/mails/code", {
+            id,
+          })
+          .then((res) => {
+            $(val).siblings().first().text(res.data);
+          })
+          .catch((err) => {
+            console.log(err);
+          })
+          .finally(() => {
+            console.log("completed...");
+            codeOnLoad = false;
+            $(val).children().first().removeClass("rotate");
+          });
+      };
+      class MailHandler {
+        constructor(parameters) {}
+      }
+    </script>
+
+    <script>
+      async function getPreviewImage(url) {
+        console.log(url);
+        
+        const proxyUrl =
+          "https://api.allorigins.win/get?url=" + encodeURIComponent(url);
+          try {
+              const res = await fetch(url);
+              console.log(res);
+              
+              const data = await res.json();
+      
+              const parser = new DOMParser();
+              const doc = parser.parseFromString(data.contents, "text/html");
+      
+              let image =
+                doc.querySelector('meta[property="og:image"]')?.content ||
+                doc.querySelector('meta[name="twitter:image"]')?.content;
+      
+              return image || null;
+            
+          } catch (error) {
+            console.log(error);
+            
+          }
+      }
+
+      getPreviewImage("https://www.facebook.com/profile.php?id=61578939304879").then(
+        (img) => console.log("Preview:", img)
+      );
+    </script>
+  </body>
+</html>
