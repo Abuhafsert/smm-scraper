@@ -26,7 +26,7 @@ class BrowserSetupHandler {
   }) => {
     await this.browser?.close();
     const browser = await webkit.launch({
-      headless,
+      headless: true,
       chromiumSandbox: false,
     });
     this.browser = browser;
@@ -45,19 +45,20 @@ class BrowserSetupHandler {
     });
 
     if (device) {
-      await context.addInitScript(() => {
-        Object.defineProperty(navigator, "webdriver", { get: () => false });
-        window.ontouchstart = true;
-        navigator.maxTouchPoints = 5;
 
-        const getParameter = WebGLRenderingContext.prototype.getParameter;
-        WebGLRenderingContext.prototype.getParameter = function (param) {
-          if (param === 37445) return "Apple Inc.";
-          if (param === 37446) return "Apple GPU";
-          return getParameter.call(this, param);
-        };
-      });
-    }
+    await context.addInitScript(() => {
+      Object.defineProperty(navigator, "webdriver", { get: () => false });
+      window.ontouchstart = true;
+      navigator.maxTouchPoints = 5;
+
+      const getParameter = WebGLRenderingContext.prototype.getParameter;
+      WebGLRenderingContext.prototype.getParameter = function (param) {
+        if (param === 37445) return "Apple Inc.";
+        if (param === 37446) return "Apple GPU";
+        return getParameter.call(this, param);
+      };
+    });
+  }
 
     const page = await context.newPage();
 
