@@ -1,7 +1,7 @@
 FROM node:22
 
 # Set working directory
-WORKDIR /app
+WORKDIR /automationscraper
 
 # Copy package.json and install dependencies
 COPY package.json .
